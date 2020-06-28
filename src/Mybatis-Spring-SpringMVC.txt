@@ -1,0 +1,121 @@
+MyBatis Spring SpringMVC 整合
+1、导入相关 jar 包
+   Spring 与 SpringMVC 核心 jar 包：
+       spring-core-5.2.3.RELEASE.jar   //提供框架的基本组成部分，包括 IoC 和依赖注入功能
+       spring-beans-5.2.3.RELEASE.jar  //提供 BeanFactory，工厂模式 xml 文件配置实现，移除了编码式单例的需要，把配置和依赖从实际编码逻辑中解耦
+       spring-context-5.2.3.RELEASE.jar  // 以一种类似于 JNDI 注册的方式访问对象，关键类 org.springframework.context.ApplicationContext
+       spring-context-support-5.2.3.RELEASE.jar // 提供了对第三方库集成到 Spring 上下文的支持
+       spring-expression-5.2.3.RELEASE.jar // SpEL：Spring 表达式语言 Spring Expression Language）
+                                                          提供了强大的表达式语言，用于在运行时查询和操作对象图
+   Spring AOP 编程 jar 包：
+       spring-aop-5.2.3.RELEASE.jar  //实现面向切面编程，允许定义方法拦截器和切入点对代码进行干净地解耦，从而使实现功能的代码彻底的解耦出来
+       aopalliance-1.0.jar
+       spring-aspects-5.2.3.RELEASE.jar  //提供与 AspectJ 的集成，是一个功能强大且成熟的面向切面编程（AOP）框架
+       aspectjrt.jar  // 如果需要实现注解公共业务类（关注点的模块化），需要导入以下俩 jar 包
+       aspectjweaver.jar
+   SpringMVC mvc 层 jar 包：
+       spring-web-5.2.3.RELEASE.jar  //
+       spring-webmvc-5.2.3.RELEASE.jar
+   SpringMVC 与 Mybatis 整合 jar 包：数据访问与继承
+       spring-jdbc-5.2.3.RELEASE.jar // 提供 JDBC 抽象层
+       spring-tx-5.2.3.RELEASE.jar // 事务（Transaction）：为实现特殊接口类及所有的 POJO 支持编程式和声明式事务管理
+       spring-jms-5.2.3.RELEASE.jar //包含生产（produce）和消费（consume）消息的功能。集成于 spring-messaging 模块
+       spring-messaging-5.2.3.RELEASE.jar
+   Spring 按需可选 jar 包：
+       spring-instrument-5.2.3.RELEASE.jar //在一定的应用服务器中提供了类 instrumentation 的支持和类加载器的实现
+       spring-orm-5.2.3.RELEASE.jar  //提供了对流行的对象关系映射 API 的集成，包括 JPA、JDO 和 Hibernate 等
+       spring-oxm-5.2.3.RELEASE.jar //提供了对 OXM 实现的支持，比如 JAXB、Castor、XML Beans、JiBX、XStream 等
+       spring-test-5.2.3.RELEASE.jar //测试模块：支持对具有 JUnit 或 TestNG 框架的 Spring 组件的测试
+   Mybatis 相关 jar 库：
+       mybatis-3.5.4.jar  // 核心库
+       asm-7.1.jar    //以下为必须依赖库
+       cglib-3.3.0.jar
+       javassist-3.26.0-GA.jar
+       log4j-1.2.17.jar
+       log4j-api-2.13.0.jar
+       log4j-core-2.13.0.jar
+       ognl-3.2.12.jar
+       slf4j-api-1.7.30.jar
+       slf4j-log4j12-1.7.30.jar
+   Mybatis 与 Spring 整合库：
+       mybatis-spring-2.0.4.jar
+   Mysql JDBC jar 包：
+       mysql-connector-java-8.0.18.jar
+   JSTL 标签库 jar 包：
+       Impl:   taglibs-standard-impl-1.2.5.jar    JSTL 实现类库
+       Spec:   taglibs-standard-spec-1.2.5.jar    JSTL 标准接口  //一般使用以上两个
+   通用库 jar 包：
+       commons-logging-1.2.jar   // 必须依赖
+       commons-fileupload-1.4.jar  // 如果需要文件上传
+       commons-io-2.7.jar
+       jackson-annotations-2.11.0.jar   // 如果需要将响应到视图的数据封装成 json 格式
+       jackson-core-2.11.0.jar
+       jackson-databind-2.11.0.jar
+2、配置相关 .xml 配置文件
+   服务器配置文件：web.xml  // 用来配置 Spring 配置文件 与 SpringMVC servlet 分发器配置文件
+   Spring 配置文件：applicationContext.xml  // 定义公共业务类、设置 aop 自动代理；配置数据源、数据库连接、事务管理
+   SpringMVC servlet 分发器配置文件：默认在 WEB-INF 下的：dispatcher-servlet.xml
+                                   可以自定义 todo 需要在 web.xml 进行相应设置
+       // 用来设置 扫描注解控制器、视图渲染器、JSON 转换器（按需）、文件上传解析器（按需）、请求拦截器等
+   Mybatis 配置文件：mybatis-config.xml // 用来设置映射器别名与映射器
+3、实现：
+  1）、根据数据库查询或者更新等操作处理的表的关系编写对应的 JavaBean 类
+  2）、抽象出真实业务相关操作，并设计成接口
+  3）、编写真实业务处理类，实现真实业务处理接口，并继承 org.mybatis.spring.support.SqlSessionDaoSupport，完成 SqlSessionFactory 注入
+      添加 todo 注解 @Repository("value")
+      /**
+       * 自动装配（注入） todo 需要要求 Spring 配置文件 applicationContext.xml 中设置：<context:component-scan base-package="com.ssm.project"/>
+       * @param sqlSessionFactory
+       */
+      @Autowired
+      @Override
+      public void setSqlSessionFactory(SqlSessionFactory sqlSessionFactory) {
+          super.setSqlSessionFactory(sqlSessionFactory);
+      }
+  4）、抽象出真实业务相关操作，并设计成接口，其中要有与真实业务相同的实现方法
+  5）、编写业务业务处理类，实现代理业务处理接口，添加 todo 注解 @Service("value")
+      代理类中，真实业务的对象使用自动注入的方式，如：
+      @Autowired
+      private StudentDao studentDao;
+      // 并实现对应 set 方法
+      public void setStudentDao(StudentDao studentDao) {
+          this.studentDao = studentDao;
+      }
+  6）、编写控制器，处理客户端请求，进行代理方法的调用
+      控制器类中，代理业务的对象使用自动注入的方式，如：
+      @Autowired
+      private StudentService studentService;
+      // 并实现对应 set 方法
+      public void setStudentService(StudentService studentService) {
+          this.studentService = studentService;
+      }
+
+
+
+
+问题：
+一、Mapped Statements collection does not contain value for
+   可能出现的原因：1、mapper 映射器文件中 sql 语句传入参数有误
+                 2、未找到映射器文件  todo 注：.xml 映射器文件只能这样定义：<mapper resource="com/ssm/project/mapper/student-mapper.xml"/>
+
+
+todo 延伸。。
+Shiro ：Apache Shiro 是一个强大且易用的Java安全框架，执行身份验证、授权、密码和会话管理
+jQuery：JavaScript 库，jQuery 极大地简化了 JavaScript 编程
+前端框架：bootstrap
+微服务：SpringBoot 开发框架
+Maven
+Git
+动态代理设计：CGLIB 避免"动态代理设计实现需要接口"的限时
+缓存组建：EhCache（用于数据库）、OSCache（用于页面视图）
+缓存数据库：redis（分布式缓存数据库，每秒并发访问量高）、memcached
+定时组件：quartz，Spring 中也有自己的定时实现
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,23 @@
+https://github.com/github/gitignore   // Git 官方给出的忽略配置规则
+
+忽略特殊文件
+1、在工作区根目录中添加特殊文件 .gitignore ,并进行相关配置，
+    如：# Python: 忽略Python编译产生的.pyc、.pyo、dist等文件或目录
+       *.py[cod]
+       *.so
+       *.egg
+       *.egg-info
+       dist
+       build
+2、将该文件 .gitignore 添加进 Git 本地仓库
+   $ git add .gitignore
+   $ git commit -m "set git ignore"
+
+强制添加某文件：git add -f <file>   // 即使该文件被 .gitignore 忽略
+
+查看某个文件是否在 .gitignore 设置：git check-ignore -v <file>
+    如：$ git check-ignore -v StudentDao.class
+       .gitignore:10:*.class	StudentDao.class   //.gitignore 的第3行，忽略规则 *.class
+
+
+

@@ -1,0 +1,27 @@
+设置别名：给指定的 git 指令设置别名
+
+--global 参数是全局参数，在该电脑的所有 Git 仓库下都有用
+     全局的配置在该电脑用户主目录下的一个隐藏文件 .gitconfig 中
+     局部的配置在工作区下的 .git 隐藏文件中的 config 文件
+如：$ git config --global alias.st status   // 查看当前工作区当前分支的文件修改情况
+        $ git st    相当于   $ git status
+   $ git config --global alias.co checkout   // 用于切换分支，或者创建分支
+        $ git co master    相当于   $ git checkout master
+        $ git co -b dev [origin/dev]   相当于   $ git checkout -b dev [origin/dev]
+   $ git config --global alias.ci commit   // 提交，将暂存区的所有内容提交到 git 本地仓库
+   $ git config --global alias.br branch   //查看当前工作区所有分支，从而查看当前分支
+   $ git config --global alias.unstage 'reset HEAD'   // 撤销修改，将暂存区的指定文件的修改撤销
+        $ git unstage readme.txt    相当于   $ git reset HEAD readme.txt
+   $ git config --global alias.last 'log -1'   // 显示最新一次提交
+        $ git last    相当于   $ git log -1
+   $ git config --global alias.lg "log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr)
+                                 %C(bold blue)<%an>%Creset' --abbrev-commit"   // 显示历史提交情况
+
+
+
+
+
+
+
+
+

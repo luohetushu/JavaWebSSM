@@ -1,0 +1,72 @@
+创建与合并分支
+
+创建并指向新的分支：  // HEAD 指针指向的分支即为当前分支
+    如：$ git checkout -b div
+        Switched to a new branch 'div'  // 此时 div 分支与 master 分支指向的提交相同
+    参数 -b 表示创建并指向，相当于如下指令：
+       $ git branch div   // 创建分支
+       $ git checkout div // 指向分支，用来分支间的切换
+    最新版也可以使用：$ git switch -c <branch>  // 创建并指向新的分支
+                    $ git switch <branch> // 指向分支，用来分支间的切换
+    创建本地与远程对应分支：$ git checkout -b <branch> // 创建并指向本地分支
+                        $ git push -u origin/<branch>  //提交并创建远程分支  本地和远程分支的名称最好一致
+
+查看当前本地仓库所有分支：
+    如：$ git branch
+        * div    // 当前分支, HEAD 指针指向的分支
+        master
+将指定分支合并到当前分支：
+    如：$ git merge div
+        Updating 9aa5184..bd63f75
+        Fast-forward    // 快进模式，合并方式之一，该模式下，删除分支后，会丢掉分支信息
+        readme.txt | 1 +
+        1 file changed, 1 insertion(+)
+    禁用 Fast-forward 模式： // Git 会在 merge 时生成一个新的 commit，这样，用普通模式合并，合并后的历史有分支，能看出来曾经做过合并
+        如：$ git merge --no-ff -m "merge with no-ff" dev  // 因为生成新的 commit，所以需要 -m 说明
+           Merge made by the 'recursive' strategy.
+           readme.txt | 1 +
+           1 file changed, 1 insertion(+)
+删除指定分支：
+    如：$ git branch -d div  // 该分支 div 已被merge（合并）才能顺利删除
+       Deleted branch div (was bd63f75).
+强制删除指定分支：$ git branch -D <branch>  // 可以删除一个没有被合并过的分支
+查看分支合并图：$ git log --graph --pretty=oneline --abbrev-commit  // --abbrev-commit 简显 commitId
+
+
+修复 todo 分支bug
+当前工作分支 dev，有做修改但不能提交，此时发现 master 分支有 bug，则需要：
+    1、把当前分支的工作现场“储藏”起来，等以后恢复现场后继续工作
+       如：$ git stash   // todo  可以多次"存储"
+           Saved working directory and index state WIP on dev: c5abd10 read file:merge with no-ff
+    2、回到 master 分支，创建临时修复 bug 分支  // 在哪个分支上修复 bug，需要切换回哪个 bug
+       如：$ git checkout master  // 回到 master 分支
+          $ git checkout -b issue-101  // 创建临时修复 bug 分支
+       修复问题，在当前临时分支上 add 与 commit：
+          $ git add readme.txt
+          $ git commit -m "read file:fix bug 101"
+          [issue-101 12e12d5] read file:fix bug 101  // todo 此次的提交可以用来复制到某个分支上，避免重复工作
+    3、修复完成，重新切回 master 分支，并合并临时修复 bug 分支 issue-101，最后删除临时分支
+          $ git checkout master  // 重新切回 master 分支
+          $ git merge --no-ff -m "merged bug fix 101" issue-101  //合并临时修复 bug 分支 issue-101
+          $ git branch -d issue-101
+bug 修复完成，回到最初的工作分支 dev，
+    1、查看当前分支“储藏”的工作现场
+        如：$ git stash list
+            stash@{0}: WIP on dev: c5abd10 read file:merge with no-ff
+            stash@{1}: WIP on dev: c5abd10 read file:merge with no-ff
+    2、恢复不删除指定工作现场：如：$ git stash apply stash@{0}
+       恢复并删除指定工作现场：如：git stash pop stash@{1}
+       删除指定工作现场：如：$ git stash drop stash@{0}
+突然想到，当前的 dev 也有 master 分支修复的 bug，此时可以 todo 使用 cherry-pick 命令，复制一个特定的提交到当前分支
+    如：$ git cherry-pick 12e12d5  // todo 需要当前的分支修改的内容已提交或者做了储藏
+                                   // 使用该方式复制，可能会造成冲突，手动修改并 add 与 commit
+
+todo 冲突
+文件冲突：  // 冲突修改之后，add 并 commit
+<<<<<<< HEAD   // 表示当前分支提交的内容
+Creating a new branch is quick & simple.
+=======   // 分割分支
+Creating a new branch is quick AND simple.
+>>>>>>> feature1   //表示另一个分支提交的内容
+
+

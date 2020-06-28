@@ -1,0 +1,57 @@
+标签：与某个 commit 绑定，根据标签查找 commit
+     如果某个 commit 既出现在 master 分支，又出现在 dev 分支，那么在这两个分支上都可以看到该标签
+
+创建标签：
+1、切换到需要打标签的分支上
+   如：$ git checkout master
+       Switched to branch 'master'
+2、创建标签：git tag <tagName>
+  如：$ git tag v1.0
+3、查看当前分支所有标签：
+  如：$ git tag
+     v1.0
+
+给历史某次 commit 创建标签：
+1、查看分支合并图：$ git log [--graph] --pretty=oneline --abbrev-commit
+   如：$ git log --pretty=oneline --abbrev-commit
+      120a1f9 (HEAD -> master, tag: v1.0, origin/master) merged bug fix 101
+      12e12d5 read file:fix bug 101
+      3dba5ff merge with no-ff
+      c5abd10 read file:merge with no-ff
+      bd63f75 create a new branch 'div'
+      9aa5184 modify readme file: add tracks;add test file
+      f629a0f add LICENSE file, know stage
+      52a2efe modify readme file:append GPL
+      f04ec62 modify readme file:add distributed
+      1fe9136 commit a readme file to repository at first
+2、给指定 commit 设置标签：git tag <tagName> <commitId>
+       如：$ git tag v0.9 3dba5ff  // 对应历史提交：3dba5ff merge with no-ff
+   创建带有说明的标签：git tag -a <tagName> -m "标签说明信息" <commitId>  //用 -a 指定标签名，-m 指定说明文字
+       注：1、指定的标签在当前分支当前 commit 上不存在
+          2、如果忽略 commitId，则默认在当前分支最新的一次 commit 上创建分支
+3、查看标签具体信息：git show <tagName>
+   如：$ git show v0.9
+      commit 3dba5ff098fa05374397d31bdde30f462a974b38 (tag: v0.9)
+      Merge: bd63f75 c5abd10
+      Author: wuyue <1398009647@qq.com>
+      Date:   Tue Jun 9 16:10:51 2020 +0800
+         merge with no-ff
+
+
+删除本地指定标签：git tag -d <tagName>
+删除远程标签：
+    1、首先删除本地标签：git tag -d <tagName>
+        如：$ git tag -d v0.9
+            Deleted tag 'v0.9' (was 3dba5ff)
+    2、再删除远程标签：git push <远程仓库名> :refs/tags/<tagName>
+        如：$ git push origin :refs/tags/v0.9
+           To https://github.com/luohetushu/FirstRepository.git
+           - [deleted]         v0.9
+
+
+推送本地标签：git push <远程仓库名> <tagName>  // 远程标签名与本地标签名对应一致
+    如：$ git push origin v1.0
+一次性推送本地尚未推送的所有标签：git push <远程仓库名> --tags
+
+
+

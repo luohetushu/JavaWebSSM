@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">  <!--DTD Document Type Definition：文档类型定义 外部约束-->
+<configuration>
+
+    <!--设置别名：可以为映射器 .xml 文件中指定类型设置别名-->
+    <typeAliases>
+        <!--给指定类设置别名-->
+        <!--<typeAlias type="com.ssm.project.bean.Student" alias="Student"/>-->
+        <!--为映射器 .xml 文件中，指定包内的，类型设置别名，别名默认为类名 -->
+        <package name="com.ssm.project.bean"/>
+    </typeAliases>
+
+    <!--mappers 元素: 包含一组映射器(mapper)-->
+    <mappers>
+        <!--映射器的 XML 映射文件包含了 SQL 代码和映射定义信息-->
+        <mapper resource="com/ssm/project/mapper/student-mapper.xml"/>
+        <!-- 使用映射器接口实现类的完全限定类名 -->
+        <!--<mapper class="com.mybatis.project.mapper.StudentMapper"/>-->
+        <!-- 将包内的映射器接口实现全部注册为映射器 -->
+        <!--<package name="com.ssm.project.mapper"/>-->
+    </mappers>
+
+</configuration>

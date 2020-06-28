@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="
+       http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/aop
+       http://www.springframework.org/schema/aop/spring-aop.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context.xsd
+       http://www.springframework.org/schema/tx
+       http://www.springframework.org/schema/tx/spring-tx.xsd">
+
+    <!--读取数据库配置资源文件-->
+    <!--<bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="location" value="classpath:dbconfig.properties"/>
+    </bean>-->
+    <!--读取数据库配置资源文件-->
+    <context:property-placeholder location="classpath:dbconfig.properties"/>
+
+    <!--配置数据源 dataSource -->
+    <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+        <!--driver 和 url、username、password 属性将会由 config.properties 文件中对应的值来替换-->
+        <property name="driverClassName" value="${mysql_driver}"/>
+        <property name="url" value="${mysql_url}"/>
+        <property name="username" value="${mysql_user}"/>
+        <property name="password" value="${mysql_password}"/>
+    </bean>
+
+    <!--配置声明式事务管理器-->
+    <bean id="txManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    <!--配置事务通知-->
+    <tx:advice id="txAdvice" transaction-manager="txManager">
+        <tx:attributes>
+            <!--配置哪些方法使用什么样的事务，配置事务的传播性：todo 这些方法是代理业务实现类中的方法-->
+            <!--事务传播特性：PROPAGATION_REQUIRED: 如果存在一个事务，则支持当前事务；如果没有事务则开启新的事务-->
+            <tx:method name="save" propagation="REQUIRED"/>
+            <tx:method name="get" read-only="true"/>
+            <tx:method name="*" propagation="REQUIRED"/>
+        </tx:attributes>
+    </tx:advice>
+
+    <!--配置 SqlSessionFactory -->
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="dataSource"/>
+        <!--设置 mybatis 配置文件-->
+        <property name="configLocation" value="classpath:mybatis-config.xml"/>
+    </bean>
+
+    <!--公共业务类，即切面（某个关注点的模块），使用注解的方式-->
+    <aop:config>
+        <!--代理业务实现类的方法：给这些方式使用事务管理，避免手动提交回滚-->
+        <aop:pointcut id="pointCut" expression="execution(* com.ssm.project.service.impl.*.*(..))"/>
+        <aop:advisor advice-ref="txAdvice" pointcut-ref="pointCut"/>
+    </aop:config>
+
+    <!--自动扫描所配置包下的所有注解
+        @Repository ：真实业务实现类 DAO 注解，如：@Repository("studentDao")
+        @Service: 代理业务实现类 Service 注解，如：@Service("studentService")
+        @Controller 控制器类，处理用户请求
+        @Autowired 类中成员属性注入，todo 需要实现对应 set 方法
+    -->
+    <!--扫描注解：扫描到，如 @Autowired，则自动注入 -->
+    <context:component-scan base-package="com.ssm.project"/>
+
+</beans>
+
+
+
